@@ -1,0 +1,7 @@
+{
+  "streamer": "demo-streamer",
+  "calls": [
+    { "id": "clear", "question": "Is the object in the zone?", "zone": { "x": 0.2, "y": 0.2, "width": 0.3, "height": 0.3 }, "viewers": ["viewer-a", "viewer-a", "viewer-b"], "observation": { "eventTime": "2026-10-29T12:00:00Z", "evidence": "synthetic observation 1", "visible": true, "changed": true, "probability": 0.95 } },
+    { "id": "obscured", "question": "Is the object in the zone?", "zone": { "x": 0.2, "y": 0.2, "width": 0.3, "height": 0.3 }, "viewers": ["viewer-a"], "observation": { "eventTime": "2026-10-29T12:01:00Z", "evidence": "synthetic observation 2", "visible": false, "changed": false, "probability": 0.01 } }
+  ]
+}
