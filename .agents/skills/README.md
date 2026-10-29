@@ -1,6 +1,6 @@
 <!-- .agents/skills/README.md: las skills de proyecto que Codex descubre en este repositorio —qué hay
-     y de dónde salen—. Se distingue de BRAINSTORM.md (la idea y el plan) y de README.md
-     (la portada): aquí solo va el índice de las skills y la regla de sincronía. -->
+     y de dónde salen—. Se distingue de README.md
+     (la portada del repo): aquí solo va el índice de las skills y la regla de sincronía. -->
 
 # Skills de proyecto para Codex
 
