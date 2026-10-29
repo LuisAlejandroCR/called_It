@@ -9,6 +9,7 @@ El repositorio está en fase de preparación: **todavía no hay código ni una i
 ## Documentación
 
 - [Especificación del MVP](MVP.md): flujo, responsabilidades, criterios de aceptación y decisiones pendientes.
+- [Prototipo web del streamer](apps/web/README.md): panel de revisión simulado (`npm run verify:web`); explica qué es simulado.
 - [Skills del proyecto](.agents/skills/README.md): referencias para Twitch, Codex y visión en tiempo real.
 
 ## Primeros pasos de desarrollo
