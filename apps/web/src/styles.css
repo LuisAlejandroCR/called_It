@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/* Palette: white and cool light gray surfaces, navy text, blue primary, restrained Twitch purple.
+   No cream, beige or warm off-white. Colors are oklch tokens mapped to Tailwind utilities below. */
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-twitch: var(--twitch);
+  --color-twitch-soft: var(--twitch-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-unknown: var(--unknown);
+  --color-unknown-soft: var(--unknown-soft);
+  --color-zone: var(--zone);
+  --shadow-card: var(--shadow-card);
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.975 0.005 255);
+  --foreground: oklch(0.24 0.06 265);
+  --card: oklch(1 0 0);
+  --primary: oklch(0.52 0.22 262);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.012 255);
+  --muted: oklch(0.955 0.008 255);
+  --muted-foreground: oklch(0.45 0.03 260);
+  --accent: oklch(0.94 0.035 262);
+  --accent-foreground: oklch(0.42 0.2 262);
+  --destructive: oklch(0.5 0.21 27);
+  --border: oklch(0.91 0.01 255);
+  --input: oklch(0.8 0.015 255);
+  --ring: oklch(0.52 0.22 262);
+  --sidebar: oklch(1 0 0);
+  --twitch: oklch(0.48 0.24 292);
+  --twitch-soft: oklch(0.95 0.035 292);
+  --success: oklch(0.46 0.15 150);
+  --success-soft: oklch(0.95 0.05 150);
+  --unknown: oklch(0.42 0.02 260);
+  --unknown-soft: oklch(0.93 0.008 260);
+  --zone: oklch(0.85 0.15 195);
+  --shadow-card: 0 1px 2px oklch(0.24 0.06 265 / 6%), 0 8px 24px -12px oklch(0.24 0.06 265 / 12%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@utility surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
