@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Called It",
+    "slug": "called-it-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "calledit",
+    "ios": { "supportsTablet": false, "bundleIdentifier": "com.calledit.prototype" },
+    "android": { "package": "com.calledit.prototype", "edgeToEdgeEnabled": true },
+    "web": { "bundler": "metro" }
+  }
+}

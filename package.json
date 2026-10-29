@@ -7,7 +7,8 @@
     "test": "node --test",
     "replay": "node src/replay.js fixtures/demo.json",
     "verify": "npm test && npm run replay",
-    "verify:web": "npm --prefix apps/web run verify"
+    "verify:web": "npm --prefix apps/web run verify",
+    "verify:mobile": "npm --prefix apps/mobile run verify"
   },
   "engines": { "node": ">=20" }
 }
