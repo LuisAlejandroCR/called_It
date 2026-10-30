@@ -37,6 +37,7 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "modulePaths": ["<rootDir>/node_modules"],
     "testMatch": [
       "**/src/specs/**/*.spec.ts?(x)"
     ],
@@ -48,3 +49,4 @@
     ]
   }
 }
+

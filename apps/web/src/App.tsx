@@ -2,6 +2,7 @@
 // Everything shown is simulated; the shell says so on every screen.
 import { Bell, Check, FileText, Home, MessageSquare, RotateCcw, Settings, Users, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { Camera } from "@/components/camera";
 import { CallPanel, CallPreview } from "@/components/call-detail";
 import { ReceiptWall } from "@/components/receipts";
 import { DemoTag } from "@/components/ui";
@@ -72,7 +73,7 @@ export default function App({ oracle = defaultOracle, bootDelay = 600 }: { oracl
             </nav>
           </div>
 
-          <main id="main" tabIndex={-1} className="px-4 py-6 sm:px-8 sm:py-8">
+          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-8 sm:py-8">
             <div aria-live="polite" className="empty:hidden">
               {session.notice && (
                 <div className="mb-6 flex items-start justify-between gap-3 rounded-lg border border-primary/20 bg-accent px-4 py-3 text-sm text-accent-foreground">
@@ -166,6 +167,28 @@ function DashboardView({ s }: { s: ReviewSession }) {
         </button>
       </header>
 
+      <section className="surface mt-6 p-5" aria-labelledby="create-call">
+        <h2 id="create-call" className="text-lg font-bold">Create a demo proposal</h2>
+        <form className="mt-3 flex flex-wrap gap-2" onSubmit={(event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const data = new FormData(form);
+          s.create(String(data.get("question") ?? ""), String(data.get("rule") ?? ""), { x: Number(data.get("x")), y: Number(data.get("y")), w: Number(data.get("w")), h: Number(data.get("h")) });
+          form.reset();
+        }}>
+          <label className="flex-1 min-w-48 text-sm">Question<input name="question" required maxLength={500} className="mt-1 block w-full rounded-lg border border-input p-2" /></label>
+          <label className="flex-1 min-w-48 text-sm">Rule<input name="rule" required maxLength={500} defaultValue="At least 20% of pixels in the selected zone are strongly red." className="mt-1 block w-full rounded-lg border border-input p-2" /></label>
+          {["x", "y", "w", "h"].map((key) => <label key={key} className="w-20 text-sm">{key.toUpperCase()}<input name={key} type="number" required min={0} max={1} step={0.01} defaultValue={key === "x" || key === "y" ? 0.25 : 0.5} className="mt-1 block w-full rounded-lg border border-input p-2" /></label>)}
+          <button className="self-end rounded-lg bg-primary px-4 py-2.5 font-semibold text-white">Create proposal</button>
+        </form>
+        <p className="mt-2 text-xs text-muted-foreground">Zone coordinates use fractions from 0 to 1. No Twitch or camera is connected.</p>
+      </section>
+      {s.selected?.status === "proposed" && (
+        <form className="mt-4 flex gap-2" onSubmit={(event) => { event.preventDefault(); const form = event.currentTarget; s.support(s.selected!, String(new FormData(form).get("viewerId") ?? "")); form.reset(); }}>
+          <label className="text-sm">Demo viewer ID<input name="viewerId" required maxLength={100} className="ml-2 rounded-lg border border-input p-2" /></label>
+          <button className="rounded-lg border border-input px-3 font-semibold">Support</button>
+        </form>
+      )}
       {s.booting ? (
         <div className="mt-6 space-y-4" aria-busy="true" aria-label="Loading calls">
           <div className="surface h-12 animate-pulse bg-muted" />
@@ -230,6 +253,16 @@ function DashboardView({ s }: { s: ReviewSession }) {
         </>
       )}
 
+      {s.selected?.status === "awaiting_suggestion" && <section className="surface mt-4 p-4" aria-label="Local demo vote">
+        <h2 className="font-bold">Local demo vote</h2><p className="text-sm">No Twitch Channel Points. Each demo identity keeps its first vote; voting closes on observation.</p>
+        <p>YES: {s.selected.localVotes?.filter(v => v.choice === "YES").length ?? 0} · NO: {s.selected.localVotes?.filter(v => v.choice === "NO").length ?? 0}</p>
+        <form className="mt-3 flex flex-wrap gap-2" onSubmit={event => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); s.vote(s.selected!, String(data.get("viewerId") ?? ""), data.get("choice") === "NO" ? "NO" : "YES"); form.reset(); }}>
+          <label>Demo voter ID <input name="viewerId" required maxLength={100} className="rounded-lg border border-input p-2" /></label>
+          <label>Choice <select name="choice" className="rounded-lg border border-input p-2"><option>YES</option><option>NO</option></select></label>
+          <button className="rounded-lg bg-primary px-3 py-2 text-white">Submit local vote</button>
+        </form>
+      </section>}
+      {s.selected?.status === "awaiting_suggestion" && <div className="mt-4"><Camera call={s.selected} onCapture={(sample) => s.capture(s.selected!, sample)} /></div>}
       <div className="mt-6">
         <ReceiptWall
           receipts={s.receipts}
@@ -292,22 +325,38 @@ function SettingsView({ s }: { s: ReviewSession }) {
   return (
     <>
       <PageHeading title="Settings" subtitle="What this prototype simulates, and how to start over." />
+      <section className="surface mt-6 p-5" aria-label="Connection mode">
+        <h2 className="text-lg font-bold">Mode: {s.mode === "twitch" ? "Twitch local (experimental)" : "Local demo"}</h2>
+        {s.mode === "twitch" && <form className="mt-3 flex gap-2" onSubmit={event => { event.preventDefault(); const form = event.currentTarget; s.setOperatorKey(String(new FormData(form).get("key") ?? "")); form.reset(); }}>
+          <label>Local operator key <input type="password" name="key" required autoComplete="off" className="rounded-lg border border-input p-2" /></label><button className="rounded-lg bg-primary px-3 text-white">Unlock this tab</button>
+        </form>}
+        <p className="mt-2 text-sm text-muted-foreground">The key is kept in this tab's memory. Twitch access tokens remain on the server.</p>
+      </section>
       <section aria-labelledby="sim-h" className="surface mt-6 p-5">
         <h2 id="sim-h" className="text-lg font-bold">Simulated in this prototype</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
           <li>Twitch: there is no connection, sign-in or channel data.</li>
           <li>Viewer proposals and supporters: pseudonymous demo ids, never names.</li>
-          <li>Camera preview: a static image. No video is captured or stored.</li>
-          <li>Oracle: canned suggestions with a reason. No camera analysis happens.</li>
+          <li>The review preview is static. An optional camera captures only a temporary crop in your browser.</li>
+          <li>Oracle: a deterministic red-pixel demo; results are uncalibrated and require confirmation.</li>
           <li>Confirmation: your click is the streamer’s confirmation. Nothing is refunded or resolved anywhere.</li>
         </ul>
         <button
           onClick={s.reset}
           className="mt-5 inline-flex items-center gap-2 rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-semibold hover:bg-secondary"
         >
-          <RotateCcw className="size-4" aria-hidden /> Restore demo data
+          <RotateCcw className="size-4" aria-hidden /> Refresh local state
         </button>
       </section>
     </>
   );
 }
+
+
+
+
+
+
+
+
+

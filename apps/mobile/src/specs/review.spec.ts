@@ -18,20 +18,20 @@ const base: Call = {
   question: "Will it boil over?",
   rule: "Water crosses the pot rim inside the zone",
   supporterIds: ["a", "b", "a"],
-  zone: { x: 0, y: 0, w: 10, h: 10 },
+  zone: { x: 0, y: 0, w: 0.1, h: 0.1 },
   status: "proposed",
   eventTime: "2026-10-29T20:14:00Z",
 };
 
 const suggested = (verdict: Verdict) =>
-  attachSuggestion(approveProposal(base), { verdict, reason: "r", evidenceHash: "0xabc" });
+  attachSuggestion(approveProposal(base), { verdict, reason: "r", evidenceHash: "a".repeat(64) });
 
 describe("review transitions", () => {
   it("counts distinct supporters", () => expect(supporterCount(base)).toBe(2));
 
   it("confirming YES creates a final receipt with rule, zone and hash", () => {
     const r = toReceipt(confirmSuggestion(suggested("YES")));
-    expect(r).toMatchObject({ verdict: "YES", canceled: false, evidenceHash: "0xabc", rule: base.rule, zone: base.zone });
+    expect(r).toMatchObject({ verdict: "YES", canceled: false, evidenceHash: "a".repeat(64), rule: base.rule, zone: base.zone });
   });
 
   it("confirming NO creates a final, not canceled receipt", () => {
@@ -76,3 +76,4 @@ describe("review transitions", () => {
     expect(() => confirmSuggestion(done)).toThrow();
   });
 });
+

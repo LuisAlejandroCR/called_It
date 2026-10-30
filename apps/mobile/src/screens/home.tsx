@@ -42,6 +42,8 @@ export function HomeScreen({ session, onReview }: Props) {
 
       {session.booting ? (
         <LoadingBlock label="Loading calls" />
+      ) : !session.connected ? (
+        <StateCard title="Server disconnected" body="Waiting for the local server. Data may be stale." action={<Button label="Retry connection" onPress={session.reset} />} />
       ) : (
         <>
           <Pressable
@@ -168,3 +170,4 @@ const s = StyleSheet.create({
   cardMeta: { fontSize: 14, color: colors.mutedForeground },
   callRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: TOUCH + 16 },
 });
+

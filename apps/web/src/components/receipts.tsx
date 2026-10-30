@@ -86,6 +86,7 @@ export function ReceiptWall({
                         <dd className="text-muted-foreground">{r.rule}</dd>
                         <dt className="font-semibold">Event time</dt>
                         <dd className="text-muted-foreground">{formatEventTime(r.eventTime)}</dd>
+                        <dt className="font-semibold">Source</dt><dd className="text-muted-foreground">{r.source === "camera-metrics" ? "Camera metrics (client-reported)" : "Offline or replay"}</dd>
                         <dt className="font-semibold">Evidence hash</dt>
                         <dd className="font-mono text-muted-foreground">{r.evidenceHash ?? "Not available"}</dd>
                         <dt className="font-semibold">Confirmed</dt>
@@ -107,3 +108,4 @@ export function ReceiptWall({
     </section>
   );
 }
+

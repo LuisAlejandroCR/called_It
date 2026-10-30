@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { approveProposal, attachSuggestion, confirmSuggestion, toReceipt } from '../packages/domain/core.js';
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
@@ -19,6 +20,7 @@ export function support(call, viewerId) {
 
 export function approve(call) {
   assert(call.state === 'proposed', 'proposal is not pending');
+  call.shared = approveProposal({ id: call.id, question: call.question, rule: call.question, supporterIds: call.viewers, zone: { x: call.zone.x, y: call.zone.y, w: call.zone.width, h: call.zone.height }, status: 'proposed', eventTime: '' });
   call.state = 'open';
 }
 
@@ -36,6 +38,7 @@ export function observe(call, observation) {
   }
   call.receipt = { question: call.question, zone: { ...call.zone }, eventTime: observation.eventTime, evidenceHash: createHash('sha256').update(observation.evidence).digest('hex'), result, rule, confirmedBy: null };
   if (Number.isFinite(observation.probability) && observation.probability >= 0 && observation.probability <= 1) call.receipt.probability = observation.probability;
+  call.shared = attachSuggestion({ ...call.shared, eventTime: observation.eventTime }, { verdict: result, reason: rule, evidenceHash: call.receipt.evidenceHash });
   call.state = 'awaiting_confirmation';
   return call.receipt;
 }
@@ -43,7 +46,10 @@ export function observe(call, observation) {
 export function confirm(call, streamerId) {
   assert(call.state === 'awaiting_confirmation', 'nothing to confirm');
   assert(typeof streamerId === 'string' && streamerId.trim(), 'streamer id required');
+  call.shared = confirmSuggestion(call.shared);
+  assert(toReceipt(call.shared)?.verdict === call.receipt.result, 'inconsistent verdict');
   call.receipt.confirmedBy = streamerId;
   call.state = call.receipt.result === 'UNKNOWN' ? 'canceled' : 'resolved';
   return call.receipt;
 }
+

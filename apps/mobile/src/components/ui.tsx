@@ -136,7 +136,7 @@ export function LoadingBlock({ label }: { label: string }) {
 
 /** Decorative crop of the demo still around a zone. The still is static; no video is stored. */
 export function ZoneThumb({ zone, width = 64, height = 44 }: { zone: Zone; width?: number; height?: number }) {
-  const imgW = (width * 100) / zone.w;
+  const imgW = width / zone.w;
   const imgH = (imgW * 9) / 16;
   return (
     <View
@@ -146,7 +146,7 @@ export function ZoneThumb({ zone, width = 64, height = 44 }: { zone: Zone; width
     >
       <Image
         source={kitchen}
-        style={{ width: imgW, height: imgH, marginLeft: -(zone.x / 100) * imgW, marginTop: -(zone.y / 100) * imgH }}
+        style={{ width: imgW, height: imgH, marginLeft: -zone.x * imgW, marginTop: -zone.y * imgH }}
       />
     </View>
   );
@@ -203,7 +203,7 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
-  headerSide: { width: 96, minHeight: TOUCH, justifyContent: "center" },
+  headerSide: { width: 72, minHeight: TOUCH, justifyContent: "center" },
   headerTitle: { flex: 1, fontSize: 18, fontWeight: "700", color: colors.foreground },
   iconButton: { width: TOUCH, height: TOUCH, alignItems: "center", justifyContent: "center" },
   notice: {
@@ -228,3 +228,5 @@ const s = StyleSheet.create({
   stateBody: { fontSize: 14, lineHeight: 20, color: colors.mutedForeground },
   skeleton: { borderRadius: radius.lg, backgroundColor: colors.muted },
 });
+
+

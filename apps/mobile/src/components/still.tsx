@@ -20,7 +20,7 @@ export function Still({ call, compact = false }: { call: Call; compact?: boolean
       {unclear && <View style={s.dim} />}
       <View
         pointerEvents="none"
-        style={[s.zone, { left: `${call.zone.x}%`, top: `${call.zone.y}%`, width: `${call.zone.w}%`, height: `${call.zone.h}%` }]}
+        style={[s.zone, { left: `${call.zone.x * 100}%`, top: `${call.zone.y * 100}%`, width: `${call.zone.w * 100}%`, height: `${call.zone.h * 100}%` }]}
       />
       {/* Opaque bar: the demo still carries its own "LIVE" badge and timestamp, which must not read as real. */}
       <View style={s.bar}>
@@ -56,3 +56,4 @@ const s = StyleSheet.create({
   barText: { color: "#fff", fontSize: 11, fontWeight: "700" },
   unclear: { flexDirection: "row", alignItems: "center", gap: 4 },
 });
+

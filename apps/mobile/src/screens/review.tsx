@@ -66,8 +66,8 @@ export function ReviewScreen({ session, callId, onBack, onConfirmed }: Props) {
 
               {call.status === "awaiting_suggestion" && status !== "error" && (
                 <View accessible accessibilityLiveRegion="polite" accessibilityLabel="Simulated oracle is checking the marked zone" style={s.checking}>
-                  <ActivityIndicator color={colors.primary} />
-                  <Text style={s.checkingText}>Simulated oracle is checking the marked zone…</Text>
+                  <ActivityIndicator color={colors.primary} /><Button label="Use UNKNOWN without camera" variant="secondary" onPress={() => session.retryOracle(call)} />
+                  <Text style={s.checkingText}>Awaiting camera observation on web, or use offline UNKNOWN.</Text>
                 </View>
               )}
 
@@ -95,7 +95,7 @@ export function ReviewScreen({ session, callId, onBack, onConfirmed }: Props) {
                     {call.suggestion.unclearCamera && <Text style={s.unclear}>Camera view unclear</Text>}
                     <Text style={s.reason}>{call.suggestion.reason}</Text>
                     <Text style={s.fine}>
-                      Simulated suggestion, not final until you confirm.
+                      {call.suggestion.source === "camera-metrics" ? "Camera measurements from the local browser; not verified and not final until confirmed." : "Offline suggestion; not final until confirmed."}
                       {call.suggestion.verdict === "UNKNOWN" && " Confirming UNKNOWN cancels the call. It is not treated as NO."}
                     </Text>
                   </View>
@@ -104,8 +104,7 @@ export function ReviewScreen({ session, callId, onBack, onConfirmed }: Props) {
                       label={`Confirm ${call.suggestion.verdict}`}
                       hint={call.suggestion.verdict === "UNKNOWN" ? "Cancels the call. It is not treated as NO." : "Creates a receipt"}
                       onPress={() => {
-                        session.confirm(call);
-                        onConfirmed(call.id);
+                        void session.confirm(call).then((ok) => { if (ok) onConfirmed(call.id); });
                       }}
                     />
                     <Button
@@ -150,3 +149,6 @@ const s = StyleSheet.create({
   reason: { fontSize: 15, lineHeight: 22, color: colors.foreground },
   fine: { fontSize: 12, lineHeight: 17, color: colors.mutedForeground },
 });
+
+
+

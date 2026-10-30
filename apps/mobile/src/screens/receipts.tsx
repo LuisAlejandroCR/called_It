@@ -110,6 +110,7 @@ export function ReceiptDetailScreen({ session, callId, onBack }: { session: Revi
             <View style={[card, { gap: space.lg }]}>
               <Info icon="time-outline" label={formatEventTime(r.eventTime)} sub="Event time · reviewed by you (simulated)" />
               <Info icon="document-text-outline" label="Rule" sub={r.rule} />
+              <Info icon="information-circle-outline" label="Source" sub={r.source === "camera-metrics" ? "Camera metrics (client-reported)" : "Offline or replay"} />
               <Info icon="finger-print-outline" label="Evidence hash" sub={r.evidenceHash ?? "Not available"} mono />
             </View>
 
@@ -162,3 +163,4 @@ const s = StyleSheet.create({
   explainer: { flexDirection: "row", gap: space.md, backgroundColor: colors.accent, borderRadius: radius.lg, padding: space.lg },
   explainerText: { flex: 1, fontSize: 14, lineHeight: 21, color: colors.accentForeground },
 });
+

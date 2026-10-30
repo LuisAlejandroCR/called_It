@@ -1,6 +1,6 @@
 // call-detail.tsx: simulated video preview with the marked zone, plus the review panel
 // (approve/reject proposal, oracle suggestion, confirm/reject suggestion).
-import { AlertTriangle, EyeOff, Info, Loader2, Play, Settings, Volume2 } from "lucide-react";
+import { AlertTriangle, EyeOff, Info, Loader2 } from "lucide-react";
 import kitchen from "@/assets/stream-kitchen.jpg";
 import type { OracleStatus } from "@/lib/use-review-session";
 import { supporterCount, type Call } from "@/lib/review";
@@ -30,7 +30,7 @@ export function CallPreview({ call }: { call: Call }) {
       />
       <div
         className="absolute rounded-sm border-[3px] border-zone"
-        style={{ left: `${call.zone.x}%`, top: `${call.zone.y}%`, width: `${call.zone.w}%`, height: `${call.zone.h}%` }}
+        style={{ left: `${call.zone.x * 100}%`, top: `${call.zone.y * 100}%`, width: `${call.zone.w * 100}%`, height: `${call.zone.h * 100}%` }}
         aria-hidden
       />
       {/* Opaque bar: the demo still carries its own "LIVE" badge and timestamp, which must not read as real. */}
@@ -41,15 +41,6 @@ export function CallPreview({ call }: { call: Call }) {
             <EyeOff className="size-3.5" aria-hidden /> Camera view unclear
           </span>
         )}
-      </div>
-      {/* Decorative player bar: the preview is a still image, nothing plays. */}
-      <div aria-hidden className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-foreground/80 to-transparent px-4 pb-3 pt-8 text-primary-foreground">
-        <Play className="size-5 fill-current" />
-        <div className="h-1 flex-1 rounded-full bg-primary-foreground/30">
-          <div className="h-1 w-2/5 rounded-full bg-primary-foreground" />
-        </div>
-        <Volume2 className="size-4" />
-        <Settings className="size-4" />
       </div>
       <figcaption className="sr-only">
         The cyan rectangle marks the target zone used to resolve this call. The preview is a static demo image.
@@ -90,9 +81,9 @@ export function CallPanel({ call, oracleStatus, ...on }: Props) {
         )}
 
         {call.status === "awaiting_suggestion" && oracleStatus !== "error" && (
-          <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm">
+          <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-muted p-4 text-sm">
             <Loader2 className="size-5 animate-spin text-primary" aria-hidden />
-            Simulated oracle is checking the marked zone…
+            Observation pending. <button className="rounded-lg border border-input px-3 py-2 font-semibold" onClick={on.onRetry}>Use UNKNOWN without camera</button>
           </div>
         )}
 
@@ -114,7 +105,7 @@ export function CallPanel({ call, oracleStatus, ...on }: Props) {
               <p className="flex items-center gap-1.5 text-sm font-semibold">
                 Oracle suggestion
                 <Info className="size-4 text-muted-foreground" aria-hidden />
-                <span className="sr-only">Simulated and not final until you confirm.</span>
+                <span className="sr-only">Not final until you confirm.</span>
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <VerdictBadge verdict={s.verdict} />
@@ -122,7 +113,7 @@ export function CallPanel({ call, oracleStatus, ...on }: Props) {
               </div>
               <p className="mt-2 text-sm text-muted-foreground">{s.reason}</p>
               <p className="mt-2 text-xs text-muted-foreground">
-                Simulated suggestion, not final until you confirm.
+                {s.source === "camera-metrics" ? "Camera measurements from the local browser; not verified and not final until confirmed." : "Offline suggestion; not final until confirmed."}
                 {s.verdict === "UNKNOWN" && " Confirming UNKNOWN cancels the call. It is not treated as NO."}
               </p>
             </section>
@@ -138,3 +129,8 @@ export function CallPanel({ call, oracleStatus, ...on }: Props) {
     </article>
   );
 }
+
+
+
+
+

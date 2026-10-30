@@ -59,6 +59,7 @@ function Shell({ oracle = defaultOracle, bootDelay = 600 }: { oracle?: Oracle; b
 
   return (
     <View style={s.root}>
+      {!session.booting && !session.connected && <Text accessibilityRole="alert" style={{ color: colors.destructive, padding: 8 }}>Disconnected: displayed data may be stale. Retrying…</Text>}
       <View style={s.screen}>
         {top?.name === "review" ? (
           <ReviewScreen session={session} callId={top.callId} onBack={pop} onConfirmed={(id) => replace({ name: "receipt", callId: id })} />
@@ -113,3 +114,4 @@ const s = StyleSheet.create({
   tab: { flex: 1, minHeight: TOUCH + 8, alignItems: "center", justifyContent: "center", gap: 2 },
   tabLabel: { fontSize: 12, fontWeight: "600" },
 });
+
