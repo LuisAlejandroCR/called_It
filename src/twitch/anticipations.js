@@ -11,7 +11,7 @@ const fail = message => { throw new Error(message); };
 // A deliberately small, persistent domain for chat-first calls. It retains the
 // accepted text and opaque author ID, not a transcript or viewer profile.
 export function createAnticipationService(file, { now = () => new Date().toISOString(), maxSeenEvents = 1000, proposalCooldownMs = 10_000 } = {}) {
-  let state = { version: 1, proposals: [], receipts: [], seenEventIds: [], lastProposalAt: {} };
+  let state = { version: 1, proposals: [], receipts: [], seenEventIds: [], lastProposalAt: {}, revocations: [] };
   let queue = Promise.resolve();
   async function load() { try { state = { ...state, ...JSON.parse(await readFile(file, 'utf8')) }; } catch (error) { if (error.code !== 'ENOENT') throw error; } }
   async function persist(next) { await mkdir(path.dirname(file), { recursive: true }); const temp = `${file}.${randomUUID()}.tmp`; await writeFile(temp, JSON.stringify(next, null, 2), { mode: 0o600, flag: 'wx' }); await rename(temp, file); }
@@ -56,6 +56,12 @@ export function createAnticipationService(file, { now = () => new Date().toISOSt
       return clone(call);
     }); },
     receipt(id) { const value = state.receipts.find(item => item.callId === id); return value ? clone(value) : null; }
+    ,recordRevocation({ eventId, subscriptionId, channelId, status, receivedAt = now() }) { return commit(next => {
+      if (![eventId, subscriptionId, channelId, status].every(isText)) fail('Invalid revocation');
+      if (next.revocations.some(item => item.eventId === eventId)) return { duplicate: true };
+      next.revocations.unshift({ eventId, subscriptionId, channelId, status, receivedAt }); if (next.revocations.length > 100) next.revocations.length = 100;
+      return { duplicate: false };
+    }); }
   };
 }
 

@@ -12,18 +12,22 @@ const read = async (request, limit = 16_384) => { const chunks = []; let size = 
 
 // Intended for a TLS reverse proxy in production. It is deliberately separate
 // from the camera demo so no unauthenticated EventSub payload can alter it.
-export async function startChatServer({ port = 4181, host = '127.0.0.1', file, eventSubSecret, operatorKey, operator = { id: 'local-operator', role: 'broadcaster' } } = {}) {
-  if (!file || typeof eventSubSecret !== 'string' || eventSubSecret.length < 10 || typeof operatorKey !== 'string' || operatorKey.length < 32) throw new Error('Chat server configuration incomplete');
+export async function startChatServer({ port = 4181, host = '127.0.0.1', file, eventSubSecret, operatorKey, channelId, operator = { id: 'local-operator', role: 'broadcaster' }, now = () => Date.now() } = {}) {
+  if (!file || typeof eventSubSecret !== 'string' || eventSubSecret.length < 10 || typeof operatorKey !== 'string' || operatorKey.length < 32 || typeof channelId !== 'string' || !channelId || !operator || !['broadcaster', 'moderator'].includes(operator.role) || typeof operator.id !== 'string' || !operator.id) throw new Error('Chat server configuration incomplete');
   const service = createAnticipationService(file); await service.load();
   const server = http.createServer(async (request, response) => {
     try {
       if (request.url === '/eventsub' && request.method === 'POST') {
         const rawBody = await read(request);
-        if (!verifyEventSubSignature({ headers: request.headers, rawBody, secret: eventSubSecret })) { response.writeHead(403); return response.end(); }
+        if (!verifyEventSubSignature({ headers: request.headers, rawBody, secret: eventSubSecret, now: now() })) { response.writeHead(403); return response.end(); }
         const body = JSON.parse(rawBody.toString('utf8')); const type = request.headers['twitch-eventsub-message-type'];
         if (type === 'webhook_callback_verification' && typeof body.challenge === 'string') { response.writeHead(200, { 'Content-Type': 'text/plain' }); return response.end(body.challenge); }
-        if (type !== 'notification' || body.subscription?.type !== 'channel.chat.message') { response.writeHead(204); return response.end(); }
-        await ingestChatMessage({ service, eventId: request.headers['twitch-eventsub-message-id'], event: body.event }); response.writeHead(204); return response.end();
+        if (type === 'revocation') {
+          if (body.subscription?.type !== 'channel.chat.message' || body.subscription?.condition?.broadcaster_user_id !== channelId || typeof body.subscription?.id !== 'string' || typeof body.subscription?.status !== 'string') { response.writeHead(400); return response.end(); }
+          await service.recordRevocation({ eventId: request.headers['twitch-eventsub-message-id'], subscriptionId: body.subscription.id, channelId, status: body.subscription.status }); response.writeHead(204); return response.end();
+        }
+        if (type !== 'notification' || body.subscription?.type !== 'channel.chat.message' || body.subscription?.condition?.broadcaster_user_id !== channelId || body.event?.broadcaster_user_id !== channelId) { response.writeHead(400); return response.end(); }
+        await ingestChatMessage({ service, eventId: request.headers['twitch-eventsub-message-id'], event: body.event, expectedChannelId: channelId }); response.writeHead(204); return response.end();
       }
       if (request.url === '/api/anticipations' && request.method === 'GET') {
         const state = service.snapshot();
