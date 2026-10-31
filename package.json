@@ -9,6 +9,7 @@
     "twitch:auth": "node src/twitch/oauth-start.js",
     "twitch:check": "node src/twitch/check-start.js",
     "twitch:local": "node src/twitch/local-start.js",
+    "twitch:chat": "node src/twitch/chat-start.js",
     "replay": "node src/replay.js fixtures/demo.json",
     "verify": "npm test && npm run replay",
     "verify:web": "npm --prefix apps/web run verify",
