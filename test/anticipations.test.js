@@ -46,6 +46,12 @@ test('EventSub signature is verified before a chat command is ingested', async (
   assert.equal(eventSubSubscription({ broadcasterId: 'channel', botUserId: 'bot', callback: 'https://example.test/eventsub', secret }).type, 'channel.chat.message');
 });
 
+test('EventSub subscription uses an app token and exact chat condition without exposing its secret', async () => {
+  const { subscribeToChat } = await import('../src/twitch/eventsub.js'); const subscription = eventSubSubscription({ broadcasterId: 'channel', botUserId: 'bot', callback: 'https://example.test/eventsub', secret: '0123456789secret' }); let request;
+  const created = await subscribeToChat({ appToken: 'private-app-token', clientId: 'client', subscription, fetchImpl: async (url, options) => { request = { url, options }; return { ok: true, json: async () => ({ data: [{ id: 'sub', status: 'enabled' }] }) }; } });
+  assert.equal(created.id, 'sub'); assert.equal(request.url, 'https://api.twitch.tv/helix/eventsub/subscriptions'); assert.equal(request.options.headers.Authorization, 'Bearer private-app-token'); assert.deepEqual(JSON.parse(request.options.body).condition, { broadcaster_user_id: 'channel', user_id: 'bot' });
+});
+
 test('chat server handles signed EventSub verification and never accepts a caller-supplied operator', async () => {
   const { startChatServer } = await import('../src/twitch/chat-server.js'); const dir = await mkdtemp(path.join(os.tmpdir(), 'called-chat-server-')); const secret = '0123456789secret'; const key = 'k'.repeat(32);
   const at = Date.parse('2026-01-01T00:00:00Z'); const server = await startChatServer({ port: 0, file: path.join(dir, 'state.json'), eventSubSecret: secret, operatorKey: key, channelId: 'channel', operator: { id: 'streamer', role: 'broadcaster' }, now: () => at }); const url = `http://127.0.0.1:${server.address().port}`;
