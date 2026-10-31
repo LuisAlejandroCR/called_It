@@ -1,0 +1,10 @@
+import type { Call, Receipt, Suggestion, Zone } from './review';
+export function supporterCount(c: Call): number;
+export function isPending(c: Call): boolean;
+export function approveProposal(c: Call): Call;
+export function rejectProposal(c: Call): Call;
+export function attachSuggestion(c: Call, s: Suggestion): Call;
+export function confirmSuggestion(c: Call): Call;
+export function rejectSuggestion(c: Call): Call;
+export function toReceipt(c: Call, now?: Date): Receipt | null;
+export function validateZone(z: Zone): boolean;

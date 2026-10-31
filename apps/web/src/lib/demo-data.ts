@@ -16,7 +16,7 @@ export function createDemoState(): { calls: Call[]; receipts: Receipt[] } {
       question: "Will it boil over?",
       rule: "YES if water crosses the pot rim inside the marked zone before the burner is turned off.",
       supporterIds: [...ids(24, "v"), "v-1", "v-2"], // repeated ids count once
-      zone: { x: 32, y: 29, w: 36, h: 36 },
+      zone: { x: 0.32, y: 0.29, w: 0.36, h: 0.36 },
       status: "suggested",
       eventTime: today(20, 14),
       suggestion: {
@@ -30,7 +30,7 @@ export function createDemoState(): { calls: Call[]; receipts: Receipt[] } {
       question: "Will they add salt to the water?",
       rule: "YES if salt is added to the pot inside the marked zone within 5 minutes of approval.",
       supporterIds: ids(11, "w"),
-      zone: { x: 34, y: 31, w: 32, h: 32 },
+      zone: { x: 0.34, y: 0.31, w: 0.32, h: 0.32 },
       status: "proposed",
       eventTime: today(20, 20),
     },
@@ -43,8 +43,8 @@ export function createDemoState(): { calls: Call[]; receipts: Receipt[] } {
       canceled: false,
       eventTime: today(19, 42),
       rule: "YES if the cutting board is cleared inside the zone before 7:45 PM.",
-      zone: { x: 5, y: 45, w: 30, h: 40 },
-      evidenceHash: "0x9f3a…c21e",
+      zone: { x: 0.05, y: 0.45, w: 0.3, h: 0.4 },
+      evidenceHash: "a".repeat(64),
       confirmedAt: today(19, 46),
     },
     {
@@ -54,8 +54,8 @@ export function createDemoState(): { calls: Call[]; receipts: Receipt[] } {
       canceled: false,
       eventTime: today(18, 18),
       rule: "YES if pasta enters the pot inside the marked zone within 5 minutes of approval.",
-      zone: { x: 36, y: 30, w: 32, h: 34 },
-      evidenceHash: "0x4be1…07ad",
+      zone: { x: 0.36, y: 0.3, w: 0.32, h: 0.34 },
+      evidenceHash: "b".repeat(64),
       confirmedAt: today(18, 24),
     },
     {
@@ -65,7 +65,7 @@ export function createDemoState(): { calls: Call[]; receipts: Receipt[] } {
       canceled: true,
       eventTime: today(17, 3),
       rule: "YES if cheese is added to the plate inside the marked zone.",
-      zone: { x: 60, y: 55, w: 30, h: 35 },
+      zone: { x: 0.6, y: 0.55, w: 0.3, h: 0.35 },
       confirmedAt: today(17, 10),
     },
   ];
@@ -92,15 +92,17 @@ export function createSimulatedOracle(delayMs = 1200): Oracle {
           resolve({
             verdict: "YES",
             reason: "Salt was observed entering the pot inside the zone (simulated).",
-            evidenceHash: "0x77c0…e9b2",
+            evidenceHash: "c".repeat(64),
           });
           return;
         }
         resolve({
           verdict: "NO",
           reason: "Nothing was observed inside the zone during the window (simulated).",
-          evidenceHash: "0x12ad…5f90",
+          evidenceHash: "d".repeat(64),
         });
       }, delayMs);
     });
 }
+
+

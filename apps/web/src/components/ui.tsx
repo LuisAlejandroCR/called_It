@@ -41,17 +41,19 @@ export const btnOutline = `${btn} border border-input bg-card text-foreground ho
 
 /** Decorative crop of the demo still around a zone. The still is static; no video is stored. */
 export function ZoneThumb({ zone }: { zone: Zone }) {
-  const px = zone.w >= 100 ? 0 : (zone.x / (100 - zone.w)) * 100;
-  const py = zone.h >= 100 ? 0 : (zone.y / (100 - zone.h)) * 100;
+  const px = zone.w >= 1 ? 0 : (zone.x / (1 - zone.w)) * 100;
+  const py = zone.h >= 1 ? 0 : (zone.y / (1 - zone.h)) * 100;
   return (
     <span
       aria-hidden
       className="hidden h-10 w-16 shrink-0 sm:block rounded-md bg-muted bg-no-repeat"
       style={{
         backgroundImage: `url(${kitchen})`,
-        backgroundSize: `${10000 / zone.w}% auto`,
+        backgroundSize: `${100 / zone.w}% auto`,
         backgroundPosition: `${px}% ${py}%`,
       }}
     />
   );
 }
+
+

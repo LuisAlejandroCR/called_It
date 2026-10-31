@@ -1,0 +1,7 @@
+/data/
+
+/data/
+/apps/mobile/dist-check/
+.env
+.env.*
+!.env.example
