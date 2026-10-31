@@ -47,6 +47,7 @@ export function createAnticipationService(file, { now = () => new Date().toISOSt
       } else if (action === 'close') {
         if (!['accepted', 'participation_open'].includes(call.status)) fail('Only an open call can close');
         if (!isText(referenceTime) || !Number.isFinite(Date.parse(referenceTime))) fail('A valid pre-outcome reference time is required');
+        if (Date.parse(referenceTime) > Date.parse(at)) fail('The close reference cannot be after the close time');
         call.status = 'closed'; call.closedAt = at; call.referenceTime = referenceTime; call.closedBy = { id: actor.id, role: actor.role };
       } else if (action === 'resolve') {
         if (call.status !== 'closed' || !RESULTS.has(referenceTime)) fail('Only a closed call can receive a valid result');

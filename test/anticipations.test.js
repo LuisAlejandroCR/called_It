@@ -16,21 +16,21 @@ test('chat calls persist, deduplicate, limit spam, and produce a human-confirmed
     assert.equal((await service.propose({ channelId: 'channel', viewerId: 'viewer', text: 'the boss falls', eventId: 'event-1', receivedAt: '2026-01-01T00:00:01.000Z' })).duplicate, true);
     assert.equal((await service.propose({ channelId: 'channel', viewerId: 'viewer', text: 'another', eventId: 'event-2', receivedAt: '2026-01-01T00:00:00.500Z' })).rateLimited, true);
     const id = first.proposal.id; await service.transition({ id, actor: operator, action: 'accept' }); await service.transition({ id, actor: operator, action: 'open' });
-    await assert.rejects(service.transition({ id, actor: { id: 'viewer', role: 'viewer' }, action: 'close', referenceTime: '2026-01-01T00:02:00Z' }));
-    await service.transition({ id, actor: operator, action: 'close', referenceTime: '2026-01-01T00:02:00Z' });
+    await assert.rejects(service.transition({ id, actor: { id: 'viewer', role: 'viewer' }, action: 'close', referenceTime: '1970-01-01T00:00:00Z' }));
+    await service.transition({ id, actor: operator, action: 'close', referenceTime: '1970-01-01T00:00:00Z' });
     const resolved = await service.transition({ id, actor: operator, action: 'resolve', referenceTime: 'UNCLEAR' }); assert.equal(resolved.status, 'confirmed');
     const receipt = service.receipt(id); assert.deepEqual({ result: receipt.result, humanConfirmed: receipt.humanConfirmed, role: receipt.confirmedBy.role }, { result: 'UNCLEAR', humanConfirmed: true, role: 'moderator' });
     const restarted = createAnticipationService(path.join(dir, 'state.json')); await restarted.load(); assert.equal(restarted.receipt(id).result, 'UNCLEAR');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
-test('only one channel call can be active and closed text cannot mutate', async () => {
+test('only one channel call can be active under concurrent acceptance and closed text cannot mutate', async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'called-active-')); const service = createAnticipationService(path.join(dir, 'state.json'), { proposalCooldownMs: 0 }); await service.load();
   try {
     const one = (await service.propose({ channelId: 'c', viewerId: 'a', text: 'one', eventId: '1', receivedAt: '2026-01-01T00:00:00Z' })).proposal.id;
     const two = (await service.propose({ channelId: 'c', viewerId: 'b', text: 'two', eventId: '2', receivedAt: '2026-01-01T00:00:01Z' })).proposal.id;
-    await service.transition({ id: one, actor: operator, action: 'accept' }); await assert.rejects(service.transition({ id: two, actor: operator, action: 'accept' }));
-    await service.transition({ id: one, actor: operator, action: 'close', referenceTime: '2026-01-01T00:01:00Z' }); await assert.rejects(service.transition({ id: one, actor: operator, action: 'accept' }));
+    const attempts = await Promise.allSettled([service.transition({ id: one, actor: operator, action: 'accept' }), service.transition({ id: two, actor: operator, action: 'accept' })]); assert.equal(attempts.filter(item => item.status === 'fulfilled').length, 1);
+    const accepted = attempts[0].status === 'fulfilled' ? one : two; await assert.rejects(service.transition({ id: accepted, actor: operator, action: 'close', referenceTime: '2999-01-01T00:00:00Z' })); await service.transition({ id: accepted, actor: operator, action: 'close', referenceTime: '2026-01-01T00:00:00Z' }); await assert.rejects(service.transition({ id: accepted, actor: operator, action: 'accept' }));
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
