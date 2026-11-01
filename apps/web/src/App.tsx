@@ -3,6 +3,7 @@
 import { Bell, Check, FileText, Home, MessageSquare, RotateCcw, Settings, Users, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Camera } from "@/components/camera";
+import { ChatAnticipations } from "@/components/chat-anticipations";
 import { CallPanel, CallPreview } from "@/components/call-detail";
 import { ReceiptWall } from "@/components/receipts";
 import { DemoTag } from "@/components/ui";
@@ -271,6 +272,7 @@ function DashboardView({ s }: { s: ReviewSession }) {
           subtitle="A record of your recently confirmed calls."
         />
       </div>
+      <ChatAnticipations />
     </>
   );
 }
